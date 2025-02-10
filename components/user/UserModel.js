@@ -14,7 +14,7 @@ const user = new Schema({
   role: { type: Number, default: 1 },
   image: { type: String, default: '' },
   isVerified: { type: Boolean, default: false },
-  createAt: { type: Date, default: Date.now },
+  createAt: { type: String, default: '' },
   //1:user,2:system,3:admin
 });
 
