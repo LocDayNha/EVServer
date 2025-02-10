@@ -5,6 +5,10 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var mongoose = require('mongoose');
 
+require("./components/user/UserModel");
+
+var userRouter = require("./routes/api/UserAPI");
+
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 
@@ -20,16 +24,24 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+//connect database
+//mJ7Czq3K9ECbfoCU
+mongoose.connect('mongodb+srv://locdaynha:mJ7Czq3K9ECbfoCU@evdata.jbycp.mongodb.net/?retryWrites=true&w=majority&appName=EVData')
+  .then(() => console.log('>>>>>>>>>> DB Connected!!!!!!'))
+  .catch(err => console.log('>>>>>>>>> DB Error: ', err));
+
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 
+app.use('/user', userRouter);
+
 // catch 404 and forward to error handler
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
   next(createError(404));
 });
 
 // error handler
-app.use(function(err, req, res, next) {
+app.use(function (err, req, res, next) {
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
