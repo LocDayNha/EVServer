@@ -5,9 +5,23 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var mongoose = require('mongoose');
 
+require("./components/brand/BrandModel");
+require("./components/port/PortModel");
+require("./components/rating/RatingModel");
+require("./components/services/ServicesModel");
+require("./components/specification/SpecificationModel");
+require("./components/station/StationModel");
 require("./components/user/UserModel");
+require("./components/vehicle/VehicleModel");
 
+var brandRouter = require("./routes/api/BrandAPI");
+var portRouter = require("./routes/api/PortAPI");
+var ratingRouter = require("./routes/api/RatingAPI");
+var servicesRouter = require("./routes/api/ServicesAPI");
+var specificationRouter = require("./routes/api/SpecificationAPI");
+var stationRouter = require("./routes/api/StationAPI");
 var userRouter = require("./routes/api/UserAPI");
+var vehicleRouter = require("./routes/api/VehicleAPI");
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -33,7 +47,14 @@ mongoose.connect('mongodb+srv://locdaynha:mJ7Czq3K9ECbfoCU@evdata.jbycp.mongodb.
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 
+app.use('/brand', brandRouter);
+app.use('/port', portRouter);
+app.use('/rating', ratingRouter);
+app.use('/services', servicesRouter);
+app.use('/specification', specificationRouter);
+app.use('/station', stationRouter);
 app.use('/user', userRouter);
+app.use('/vehicle', vehicleRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
