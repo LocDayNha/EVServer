@@ -4,17 +4,25 @@ const ObjectId = Schema.ObjectId;
 
 const station = new Schema({
     id: { type: ObjectId },
-    user_id: { type: ObjectId, ref: "user" },
-    station_id: { type: ObjectId, ref: "station" },
-    brand_id: {type: ObjectId, ref: "brand"},
-    specification: {type: Array, default:''},
-    service: {type: Array, default:''},
-    name: {type: String, default:''},
-    location: {type: String, default:''},
-    time: {type: String, default:''},
-    note: {type: String, default:''},
-    comfirm: {type: Number, default:''},
-    isActive: { type: Boolean, default: true },
+    user_id: { type: ObjectId, ref: 'user' },
+    brand_id: { type: ObjectId, ref: 'brand' },
+    specification: [
+        {
+            specification_id: { type: ObjectId, ref: 'specification' }
+        }
+    ],
+    service: [
+        {
+            service_id: { type: ObjectId, ref: 'service' }
+        }
+    ],
+    name: { type: String, default: '' },
+    location: { type: String, dsefault: '' },
+    lat: { type: Number, default: '' },
+    lng: { type: Number, default: '' },
+    time: { type: String, default: '' },
+    note: { type: String, default: '' },
+    isActive: { type: Number, default: 1 }, // 1 chờ, 2 đang hoạt dộng, 3 bị hủy, 4 tạm dừng hoạt động
     createAt: { type: String, default: '' },
 });
 

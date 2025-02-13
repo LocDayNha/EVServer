@@ -9,7 +9,7 @@ const validationAddnew = async (req, res, next) => {
         return res.status(400).json({ status: false, message: "Dữ liệu không hợp lệ" });
     }
 
-    name = name.replace(/\s+/g, "").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    // name = name.replace(/\s+/g, "").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
     const nameRegex = /^[a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂễỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪửữựỳỵỷỹ]+$/u;
     if (!nameRegex.test(name)) {
         return res.status(400).json({ status: false, message: "Nhập chữ cái" });
