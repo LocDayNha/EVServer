@@ -5,7 +5,7 @@ var specificationModel = require("../../components/specification/SpecificationMo
 //localhost:3000/specification/addNew
 router.post("/addNew", async function (req, res, next) {
     try {
-        const { user_id, vehicle_id, port_id, kw, slot, price } = req.body;
+        const { user_id, vehicle_id, port_id, kw, slot, price, type } = req.body;
 
         const currentDate = new Date();
         let day = String(currentDate.getDate()).padStart(2, '0');
@@ -14,7 +14,7 @@ router.post("/addNew", async function (req, res, next) {
 
         let timeNow = currentDate.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
         let dayNow = `${day}/${month}/${year}`;
-        const addNew = { user_id, vehicle_id, port_id, kw, slot, price, createAt: `${dayNow} : ${timeNow}` };
+        const addNew = { user_id, vehicle_id, port_id, kw, slot, price, type, createAt: `${dayNow} : ${timeNow}` };
 
         await specificationModel.create(addNew);
         return res.status(200).json({ status: true, message: "Thêm mới thành công", addNew });
@@ -86,7 +86,7 @@ router.get("/getByIdUser", async function (req, res, next) {
 router.post("/update", async function (req, res, next) {
     try {
         const { id } = req.body;
-        const { vehicle_id, port_id, kw, slot, price } = req.body;
+        const { vehicle_id, port_id, kw, slot, price, type } = req.body;
 
         const itemEdit = await specificationModel.findById(id);
 
@@ -96,6 +96,7 @@ router.post("/update", async function (req, res, next) {
             itemEdit.kw = kw ? kw : itemEdit.kw;
             itemEdit.slot = slot ? slot : itemEdit.slot;
             itemEdit.price = price ? price : itemEdit.price;
+            itemEdit.type = type ? type : itemEdit.type;
             await itemEdit.save();
             return res.status(200).json({ status: true, message: "Cập nhật thành công" });
         } else {

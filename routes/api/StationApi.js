@@ -3,6 +3,7 @@ var router = express.Router();
 var stationModel = require('../../components/station/StationModel');
 var portModel = require('../../components/port/PortModel');
 var vehicleModel = require('../../components/vehicle/VehicleModel');
+const axios = require('axios');
 
 //localhost:3000/station/addNew
 router.post("/addNew", async function (req, res, next) {
@@ -36,6 +37,45 @@ router.get("/getByIdUser", async function (req, res, next) {
         }
 
         const data = await stationModel.find({ user_id: user_id }).populate([
+            { path: 'user_id', select: 'name image address' },
+            { path: 'brand_id', select: 'name' },
+            {
+                path: 'specification.specification_id',
+                model: 'specification',
+                populate: [
+                    { path: 'vehicle_id', model: 'vehicle', select: 'name' },
+                    { path: 'port_id', model: 'port', select: 'name type image' }
+                ]
+            },
+            {
+                path: 'service.service_id',
+                model: 'service',
+                select: 'name'
+            }
+        ]);
+
+        if (data) {
+            return res.status(200).json({ status: true, message: "Danh sách:", data });
+        } else {
+            return res.status(404).json({ status: false, message: "Không tìm thấy dữ liệu!" });
+        }
+
+    } catch (error) {
+        console.error("error:", error);
+        return res.status(500).json({ status: false, message: "Lỗi hệ thống!" });
+    }
+});
+
+//localhost:3000/station/
+router.get("/getByisActive", async function (req, res, next) {
+    try {
+        const { isActive } = req.body;
+
+        if (!isActive) {
+            return res.status(400).json({ status: false, message: "Thiếu isActive!" });
+        }
+
+        const data = await stationModel.find({ isActive: isActive }).populate([
             { path: 'user_id', select: 'name image address' },
             { path: 'brand_id', select: 'name' },
             {
@@ -121,8 +161,6 @@ router.post("/update", async function (req, res, next) {
             itemEdit.time = time ? time : itemEdit.time;
             itemEdit.note = note ? note : itemEdit.note;
 
-// thực hiện thay đổi thông tin dịch vụ
-
             await itemEdit.save();
             return res.status(200).json({ status: true, message: "Cập nhật thành công" });
         } else {
@@ -136,34 +174,109 @@ router.post("/update", async function (req, res, next) {
     }
 });
 
-//localhost:3000/station/testGoogleMap
-router.post("/testGoogleMap", async function (req, res, next) {
+//localhost:3000/station/updateisActive
+router.post("/updateisActive", async function (req, res, next) {
     try {
-        const { lat1, lng1, lat2, lng2 } = req.body;
+        const { id } = req.body;
+        const { isActive } = req.body;
 
-        if (!lat1 || !lng1 || !lat2 || !lng2) {
-            return res.status(400).json({ status: false, message: "All coordinates (lat1, lng1, lat2, lng2) are required." });
+        const itemEdit = await stationModel.findById(id);
+
+        if (itemEdit) {
+            itemEdit.isActive = isActive ? isActive : itemEdit.isActive;
+            await itemEdit.save();
+            return res.status(200).json({ status: true, message: "Cập nhật thành công" });
+        } else {
+            return res.status(400).json({ status: false, message: "Cập nhật thất bại" });
         }
-        // Klm
-        const getDistanceInKm = (lat1, lng1, lat2, lng2) => {
-            const toRad = (value) => (value * Math.PI) / 180;
-            const R = 6371;
-            const dLat = toRad(lat2 - lat1);
-            const dLng = toRad(lng2 - lng1);
-            const a =
-                Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
-                Math.sin(dLng / 2) * Math.sin(dLng / 2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-            return R * c;
-        };
 
-        let distanceInKm = getDistanceInKm(lat1, lng1, lat2, lng2);
-        distanceInKm = Math.round(distanceInKm * 10) / 10;
+    }
+    catch (error) {
+        console.log("error:", error);
+        return res.status(500).json({ status: false, message: "Lỗi hệ thống !" });
+    }
+});
 
-        const googleMapsLocation = `https://www.google.com/maps?q=${lat1},${lng1}`;
-        const googleMapsTrack = `https://www.google.com/maps/dir/${lat1},${lng1}/${lat2},${lng2}`;
-        return res.status(200).json({ status: true, googleMapsTrack, distanceInKm });
+//localhost:3000/station/testGoogleMapTrack
+router.post("/testGoogleMapTrack", async function (req, res) {
+    try {
+        const { addressStart, addressEnd, lat1, lng1, lat2, lng2 } = req.body;
+
+        let origin, destination;
+
+        if (addressStart) {
+            origin = encodeURIComponent(addressStart);
+        } else if (lat1 && lng1) {
+            origin = `${lat1},${lng1}`;
+        } else {
+            return res.status(400).json({ status: false, message: "Thiếu dữ liệu điểm xuất phát" });
+        }
+
+        if (addressEnd) {
+            destination = encodeURIComponent(addressEnd);
+        } else if (lat2 && lng2) {
+            destination = `${lat2},${lng2}`;
+        } else {
+            return res.status(400).json({ status: false, message: "Thiếu dữ liệu điểm đến" });
+        }
+
+        const url = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}`;
+
+        return res.status(200).json({
+            status: true,
+            message: "Thành công",
+            url: url
+        });
+    } catch (error) {
+        console.log("error:", error);
+        return res.status(500).json({ status: false, message: "Lỗi hệ thống !" });
+    }
+});
+
+//localhost:3000/station/testGoogleMapAddressEncoding
+router.post("/testGoogleMapAddressEncoding", async function (req, res) {
+    try {
+        const { address, lat1, lng1 } = req.body;
+
+        const apiKey = process.env.GOOGLE_MAP_API_KEY;
+        const geocodingUrl = `https://maps.googleapis.com/maps/api/geocode/json?key=${apiKey}`;
+        let response;
+
+        if (address) {
+            // Convert address to lat/lng
+            response = await axios.get(geocodingUrl, {
+                params: { address: address }
+            });
+
+            if (response.data.status === 'OK') {
+                const { lat, lng } = response.data.results[0].geometry.location;
+                return res.status(200).json({
+                    status: true,
+                    message: "Thành công",
+                    lat,
+                    lng
+                });
+            } else {
+                return res.status(400).json({ status: false, message: "Không tìm thấy tọa độ cho địa chỉ này!" });
+            }
+        } else if (lat1 && lng1) {
+
+            const reverseGeocodingUrl = `https://maps.googleapis.com/maps/api/geocode/json?key=${apiKey}&latlng=${lat1},${lng1}`;
+            response = await axios.get(reverseGeocodingUrl);
+
+            if (response.data.status === 'OK') {
+                const address = response.data.results[0].formatted_address;
+                return res.status(200).json({
+                    status: true,
+                    message: "Thành công",
+                    address
+                });
+            } else {
+                return res.status(400).json({ status: false, message: "Không tìm thấy địa chỉ cho tọa độ này!" });
+            }
+        } else {
+            return res.status(400).json({ status: false, message: "Vui lòng cung cấp địa chỉ hoặc tọa độ!" });
+        }
     } catch (error) {
         console.log("error:", error);
         return res.status(500).json({ status: false, message: "Lỗi hệ thống !" });

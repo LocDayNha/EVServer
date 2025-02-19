@@ -7,7 +7,7 @@ const { validation } = require("../validation/Services");
 //localhost:3000/services/addNew
 router.post("/addNew", [validation.validationAddnew], async function (req, res, next) {
     try {
-        const { name } = req.body;
+        const { name, image } = req.body;
 
         const currentDate = new Date();
         let day = String(currentDate.getDate()).padStart(2, '0');
@@ -16,7 +16,7 @@ router.post("/addNew", [validation.validationAddnew], async function (req, res, 
 
         let timeNow = currentDate.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
         let dayNow = `${day}/${month}/${year}`;
-        const addNew = { name, createAt: `${dayNow} : ${timeNow}` };
+        const addNew = { name, image, createAt: `${dayNow} : ${timeNow}` };
 
         const normalizedName = validation.removeVietnameseTones(name);
 
@@ -86,6 +86,7 @@ router.post("/update", [validation.validationAddnew], async function (req, res, 
 
         if (!dataServices || validation.removeVietnameseTones(dataServices.name) !== normalizedName) {
             itemEdit.name = name ? name : itemEdit.name;
+            itemEdit.image = image ? image : itemEdit.image;
             await itemEdit.save();
             return res.status(200).json({ status: true, message: "Cập nhật thành công" });
         } else {
