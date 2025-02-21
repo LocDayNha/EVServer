@@ -18,7 +18,7 @@ function normalizeString(str) {
 //localhost:3000/station/addNew
 router.post("/addNew", async function (req, res, next) {
     try {
-        const { user_id, brand_id, specification, service, name, location, lat, lng, time, note } = req.body;
+        const { user_id, brand_id, specification, service, image, name, location, lat, lng, time, note } = req.body;
 
         const currentDate = new Date();
         let day = String(currentDate.getDate()).padStart(2, '0');
@@ -27,7 +27,7 @@ router.post("/addNew", async function (req, res, next) {
 
         let timeNow = currentDate.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
         let dayNow = `${day}/${month}/${year}`;
-        const addNew = { user_id, brand_id, specification, service, name, location, lat, lng, time, note, createAt: `${dayNow} : ${timeNow}` };
+        const addNew = { user_id, brand_id, specification, service, image, name, location, lat, lng, time, note, createAt: `${dayNow} : ${timeNow}` };
 
         await stationModel.create(addNew);
         return res.status(200).json({ status: true, message: "Thêm mới thành công", addNew });
@@ -54,7 +54,7 @@ router.get("/get", async function (req, res, next) {
             {
                 path: 'service.service_id',
                 model: 'service',
-                select: 'name'
+                select: 'name image'
             }
         ]);
 
@@ -110,7 +110,7 @@ router.get("/getByIdUser", async function (req, res, next) {
 });
 
 //localhost:3000/station/getByNearStaion
-router.get("/getByNearStaion", async function (req, res, next) {
+router.post("/getByNearStaion", async function (req, res, next) {
     try {
         const { myLat, myLng } = req.body;
         const apiKey = process.env.GOOGLE_MAP_API_KEY;
@@ -166,7 +166,7 @@ router.get("/getByNearStaion", async function (req, res, next) {
 });
 
 //localhost:3000/station/getByAddress
-router.get("/getByAddress", async function (req, res, next) {
+router.post("/getByAddress", async function (req, res, next) {
     try {
         const { address } = req.body;
         const apiKey = process.env.GOOGLE_MAP_API_KEY;
@@ -205,7 +205,7 @@ router.get("/getByAddress", async function (req, res, next) {
 });
 
 //localhost:3000/station/getByOption
-router.get("/getByOption", async function (req, res, next) {
+router.post("/getByOption", async function (req, res, next) {
     try {
         const { vehicle, brand, electric, port, output } = req.body;
         // vehicle: "Tất cả" hoặc "Xe máy điện" hoặc "Ô tô điện"
@@ -257,7 +257,7 @@ router.get("/getByOption", async function (req, res, next) {
                     }
                 }
 
-                if (port && port !== "Tất cả") {
+                if (port && port !== "Tất cả" && port.length > 0) {
                     if (Array.isArray(port)) {
                         if (!specData.port_id || !port.includes(specData.port_id.name)) {
                             return false;
@@ -297,7 +297,7 @@ router.get("/getByOption", async function (req, res, next) {
 });
 
 //localhost:3000/station/getById
-router.get("/getById", async function (req, res, next) {
+router.post("/getById", async function (req, res, next) {
     try {
         const { id } = req.body;
 
@@ -319,7 +319,7 @@ router.get("/getById", async function (req, res, next) {
             {
                 path: 'service.service_id',
                 model: 'service',
-                select: 'name'
+                select: 'name image'
             }
         ]);
 
@@ -345,6 +345,7 @@ router.post("/update", async function (req, res, next) {
 
         if (itemEdit) {
             itemEdit.brand_id = brand_id ? brand_id : itemEdit.brand_id;
+            itemEdit.image = image ? image : itemEdit.image;
             itemEdit.name = name ? name : itemEdit.name;
             itemEdit.location = location ? location : itemEdit.location;
             itemEdit.lat = lat ? lat : itemEdit.lat;

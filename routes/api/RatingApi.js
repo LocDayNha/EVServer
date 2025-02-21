@@ -25,7 +25,7 @@ router.post("/addNew", async function (req, res, next) {
 });
 
 //localhost:3000/rating/getByIdStation
-router.get("/getByIdStation", async function (req, res, next) {
+router.post("/getByIdStation", async function (req, res, next) {
     try {
         const { id } = req.body;
 

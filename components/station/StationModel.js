@@ -16,6 +16,7 @@ const station = new Schema({
             service_id: { type: ObjectId, ref: 'service' }
         }
     ],
+    image: { type: String, default: '' },
     name: { type: String, default: '' },
     location: { type: String, dsefault: '' },
     lat: { type: Number, default: '' },
