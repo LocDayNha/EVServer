@@ -47,9 +47,7 @@ router.post("/login", [validation.validationLogin], async function (req, res, ne
         const userMail = await userModel.findOne({ email: email });
 
         if (!userMail) {
-            return res.status(400).json({ status: false, message: "Email không tồn tại" });
-        } else if (userMail.isVerified !== true) {
-            return res.status(400).json({ status: false, message: "Email chưa được xác thực" });
+            return res.status(400).json({ status: false, message: "Email chưa được đăng ký" });
         } else {
             const result = bcrypt.compareSync(password, userMail.password);
 
