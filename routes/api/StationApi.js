@@ -72,7 +72,7 @@ router.get("/get", async function (req, res, next) {
 });
 
 //localhost:3000/station/getByIdUser
-router.get("/getByIdUser", async function (req, res, next) {
+router.post("/getByIdUser", async function (req, res, next) {
     try {
         const { user_id, isActive } = req.body;
 

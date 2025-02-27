@@ -6,7 +6,7 @@ const { validation } = require("../validation/Brand");
 //localhost:3000/brand/addNew
 router.post("/addNew", [validation.validationAddnew], async function (req, res, next) {
     try {
-        const { name } = req.body;
+        const { name, image } = req.body;
 
         const currentDate = new Date();
         let day = String(currentDate.getDate()).padStart(2, '0');
@@ -15,7 +15,7 @@ router.post("/addNew", [validation.validationAddnew], async function (req, res, 
 
         let timeNow = currentDate.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
         let dayNow = `${day}/${month}/${year}`;
-        const addNew = { name, createAt: `${dayNow} : ${timeNow}` };
+        const addNew = { name, image, createAt: `${dayNow} : ${timeNow}` };
 
         const normalizedName = validation.removeVietnameseTones(name);
 

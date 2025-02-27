@@ -16,8 +16,12 @@ router.post("/addNew", async function (req, res, next) {
         let dayNow = `${day}/${month}/${year}`;
         const addNew = { user_id, vehicle_id, port_id, kw, slot, price, type, createAt: `${dayNow} : ${timeNow}` };
 
-        await specificationModel.create(addNew);
-        return res.status(200).json({ status: true, message: "Thêm mới thành công", addNew });
+        const newSpecification = await specificationModel.create(addNew);
+        const data = await specificationModel
+            .findById(newSpecification._id)
+            .populate("vehicle_id")
+            .populate("port_id");
+        return res.status(200).json({ status: true, message: "Thêm mới thành công", data });
     } catch (error) {
         console.log("error:", error);
         return res.status(500).json({ status: false, message: "Lỗi hệ thống !" });
