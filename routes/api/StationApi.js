@@ -43,7 +43,7 @@ router.get("/get", async function (req, res, next) {
     try {
         const data = await stationModel.find({ isActive: 2 }).populate([
             { path: 'user_id', select: 'name image address' },
-            { path: 'brand_id', select: 'name' },
+            { path: 'brand_id', select: 'name image' },
             {
                 path: 'specification.specification_id',
                 model: 'specification',

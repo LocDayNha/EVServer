@@ -63,14 +63,12 @@ const validationForgot = async (req, res, next) => {
 };
 
 const validationUpdateProfile = async (req, res, next) => {
-    const { name, address, phoneNumber, gender, birth, image } = req.body;
+    const { name, phoneNumber, image } = req.body;
 
-    const nameRegex = /^[a-zA-Z\s]{5,}$/;
+    const nameRegex = /^[\p{L}\s]{5,}$/u;
     const phoneNumberRegex = /^(\+84|84|0)[35789][0-9]{8}$/;
-    const validGenders = ['nam', 'nữ', 'khác'];
 
-
-    if (!name && !address && !phoneNumber && !gender && !birth && !image) {
+    if (!name && !phoneNumber && !image) {
         return res.status(400).json({ result: false, message: 'Vui lòng nhập thông tin' });
     } else if (name) {
         if (!nameRegex.test(name)) {
@@ -79,10 +77,6 @@ const validationUpdateProfile = async (req, res, next) => {
     } else if (phoneNumber) {
         if (!phoneNumberRegex.test(phoneNumber)) {
             return res.status(400).json({ result: false, message: 'Số điện thoại không hợp lệ' });
-        }
-    } else if (gender) {
-        if (!validGenders.includes(gender.toLowerCase())) {
-            return res.status(400).json({ result: false, message: 'Giới tính không hợp lệ' });
         }
     }
 

@@ -183,14 +183,11 @@ router.post("/updateInforUser", [validation.validationUpdateProfile], async func
         const { id } = req.body;
         const user = await userModel.findById(id);
 
-        const { name, address, phoneNumber, gender, birth, image } = req.body;
+        const { name, phoneNumber, image } = req.body;
 
         if (user) {
             user.name = name ? name : user.name;
-            user.address = address ? address : user.address;
             user.phoneNumber = phoneNumber ? phoneNumber : user.phoneNumber;
-            user.gender = gender ? gender : user.gender;
-            user.birth = birth ? birth : user.birth;
             user.image = image ? image : user.image;
 
             await user.save();
