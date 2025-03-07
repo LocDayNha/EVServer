@@ -6,6 +6,9 @@ var logger = require('morgan');
 var mongoose = require('mongoose');
 
 require("./components/brand/BrandModel");
+require("./components/brandCar/BrandCarModel");
+require("./components/car/CarModel");
+require("./components/location/LocationModel");
 require("./components/port/PortModel");
 require("./components/rating/RatingModel");
 require("./components/services/ServicesModel");
@@ -15,6 +18,9 @@ require("./components/user/UserModel");
 require("./components/vehicle/VehicleModel");
 
 var brandRouter = require("./routes/api/BrandAPI");
+var brandCarRouter = require("./routes/api/BrandCarAPI");
+var carRouter = require("./routes/api/CarAPI");
+var locationRouter = require("./routes/api/LocationAPI");
 var portRouter = require("./routes/api/PortAPI");
 var ratingRouter = require("./routes/api/RatingAPI");
 var servicesRouter = require("./routes/api/ServicesAPI");
@@ -48,6 +54,9 @@ app.use('/', indexRouter);
 app.use('/users', usersRouter);
 
 app.use('/brand', brandRouter);
+app.use('/brandcar', brandCarRouter);
+app.use('/car', carRouter);
+app.use('/location', locationRouter);
 app.use('/port', portRouter);
 app.use('/rating', ratingRouter);
 app.use('/services', servicesRouter);

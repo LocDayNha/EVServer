@@ -67,7 +67,7 @@ router.post("/login", [validation.validationLogin], async function (req, res, ne
                 };
                 return res.status(200).json({ status: true, message: "Đăng nhập thành công", returnData });
             } else {
-                return res.status(400).json({ status: false, message: "Sai email hoặc mật khẩu" });
+                return res.status(400).json({ status: false, message: "Sai mật khẩu" });
             }
         }
     } catch (error) {

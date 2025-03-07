@@ -1,10 +1,10 @@
+require("dotenv").config();
 var express = require('express');
 var router = express.Router();
 var stationModel = require('../../components/station/StationModel');
 var portModel = require('../../components/port/PortModel');
 var vehicleModel = require('../../components/vehicle/VehicleModel');
 const axios = require('axios');
-// require("dotenv").config();
 
 function normalizeString(str) {
     return str
@@ -297,77 +297,87 @@ router.post("/getByOption", async function (req, res, next) {
     }
 });
 
-// Hàm kiểm tra trạm sạc có nằm trên tuyến đường không
-const isStationOnRoute = (station, route) => {
-    return route.some(point => {
-        const distance = getDistanceFromLatLonInKm(
-            station.latitude,
-            station.longitude,
-            point.lat,
-            point.lng
-        );
-        return distance <= 5; // Chấp nhận trạm sạc trong phạm vi 5km từ tuyến đường
-    });
-};
-// Hàm tính khoảng cách giữa hai tọa độ GPS
-const getDistanceFromLatLonInKm = (lat1, lon1, lat2, lon2) => {
-    const R = 6371; // Bán kính trái đất (km)
-    const dLat = deg2rad(lat2 - lat1);
-    const dLon = deg2rad(lon2 - lon1);
+// Hàm tính khoảng cách giữa hai tọa độ (Haversine formula)
+function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
+    const R = 6371; // Bán kính Trái Đất (km)
+    const dLat = (lat2 - lat1) * (Math.PI / 180);
+    const dLon = (lon2 - lon1) * (Math.PI / 180);
     const a =
         Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-        Math.cos(deg2rad(lat1)) *
-        Math.cos(deg2rad(lat2)) *
-        Math.sin(dLon / 2) *
-        Math.sin(dLon / 2);
+        Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
-};
-const deg2rad = (deg) => deg * (Math.PI / 180);
-//localhost:3000/station/getByTreval
-router.post("/getByTreval", async (req, res) => {
+}
+// Hàm kiểm tra trạm sạc có nằm trên tuyến đường hay không
+function isStationOnRoute(station, route, maxDistance = 2) {
+    return route.some(point => getDistanceFromLatLonInKm(point.lat, point.lng, station.latitude, station.longitude) <= maxDistance);
+}
+//localhost:3000/station/getByTravel
+router.post("/getByTravel", async (req, res) => {
     try {
-        const { start, end, outputEV, myLat, myLng } = req.body;
-        const apiKey = process.env.GOOGLE_MAPS_API_KEY;
+        const { outputEV, myLat, myLng, toLat, toLng } = req.body;
+        const apiKey = process.env.GOOGLE_MAP_API_KEY;
 
-        let origin = myLat && myLng ? `${myLat},${myLng}` : start;
-        let destination = end;
+        // Kiểm tra đầu vào
+        if (!myLat || !myLng || !toLat || !toLng) {
+            return res.status(400).json({ status: false, message: "Thiếu thông tin tọa độ!" });
+        }
+        if (!apiKey) {
+            return res.status(500).json({ status: false, message: "Chưa cấu hình API Key!" });
+        }
+        if (!outputEV || outputEV <= 0) {
+            return res.status(400).json({ status: false, message: "outputEV không hợp lệ!" });
+        }
 
-        // Gọi Google Maps Directions API để lấy tuyến đường
-        const directionsUrl = `https://maps.googleapis.com/maps/api/directions/json?origin=${origin}&destination=${destination}&key=${apiKey}`;
-        const directionsResponse = await axios.get(directionsUrl);
-        const route = directionsResponse.data.routes[0].legs[0].steps.map(step => step.end_location);
+        let origin = `${myLat},${myLng}`;
+        let destination = `${toLat},${toLng}`;
 
-        // Lấy danh sách trạm sạc đang hoạt động
-        const stations = await stationModel.find({ isActive: 2 }).populate([
-            { path: 'user_id', select: 'name image address' },
-            { path: 'brand_id', select: 'name' },
-            {
-                path: 'specification.specification_id',
-                model: 'specification',
-                populate: [
-                    { path: 'vehicle_id', model: 'vehicle', select: 'name' },
-                    { path: 'port_id', model: 'port', select: 'name type image' }
-                ]
-            },
-            {
-                path: 'service.service_id',
-                model: 'service',
-                select: 'name'
-            }
+        // Gọi Google Maps API & Lấy danh sách trạm sạc cùng lúc
+        const [directionsResponse, stations] = await Promise.all([
+            axios.get(`https://maps.googleapis.com/maps/api/directions/json?origin=${origin}&destination=${destination}&key=${apiKey}`),
+            stationModel.find({ isActive: 2 }).populate([
+                { path: "user_id", select: "name image address" },
+                { path: "brand_id", select: "name image" },
+                {
+                    path: "specification.specification_id",
+                    model: "specification",
+                    populate: [
+                        { path: "vehicle_id", model: "vehicle", select: "name" },
+                        { path: "port_id", model: "port", select: "name type image" }
+                    ]
+                },
+                { path: "service.service_id", model: "service", select: "name" }
+            ])
         ]);
 
-        // Lọc trạm sạc theo tuyến đường
-        const filteredStations = stations.filter(station => isStationOnRoute(station, route));
+        console.log(directionsResponse);
 
-        // Sắp xếp trạm sạc theo khoảng cách, công suất, số cổng sạc
+        // Kiểm tra xem Google Maps API có trả về tuyến đường không
+        if (!directionsResponse.data.routes.length) {
+            return res.status(400).json({ status: false, message: "Không tìm thấy tuyến đường!" });
+        }
+
+        const route = directionsResponse.data.routes[0].legs[0].steps.map(step => step.end_location);
+
+        // Lọc trạm sạc theo tuyến đường và phạm vi outputEV
+        const filteredStations = stations.filter(station => {
+            const distanceFromStart = getDistanceFromLatLonInKm(myLat, myLng, station.latitude, station.longitude);
+            return isStationOnRoute(station, route) && distanceFromStart <= outputEV;
+        });
+
+        // Sắp xếp trạm sạc theo khoảng cách từ điểm xuất phát
         filteredStations.sort((a, b) => {
             const distanceA = getDistanceFromLatLonInKm(myLat, myLng, a.latitude, a.longitude);
             const distanceB = getDistanceFromLatLonInKm(myLat, myLng, b.latitude, b.longitude);
             return distanceA - distanceB;
         });
 
-        res.status(200).json({ status: true, message: "Danh sách trạm sạc:", data: filteredStations });
+        res.status(200).json({
+            status: true,
+            message: "Danh sách trạm sạc trong phạm vi xe có thể di chuyển:",
+            data: filteredStations
+        });
     } catch (error) {
         console.error("Lỗi hệ thống:", error);
         res.status(500).json({ status: false, message: "Lỗi hệ thống!" });
