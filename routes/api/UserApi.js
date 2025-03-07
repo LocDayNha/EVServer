@@ -29,7 +29,8 @@ router.post("/register", [validation.validationRegister], async function (req, r
         let timeNow = currentDate.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
         let dayNow = `${day}/${month}/${year}`;
 
-        const register = { email, password: hash, createAt: `${dayNow} : ${timeNow}`, isVerified: false };
+        const normalizedEmail = email.charAt(0).toLowerCase() + email.slice(1);
+        const register = { email: normalizedEmail, password: hash, createAt: `${dayNow} : ${timeNow}`, isVerified: false };
         const user = new userModel(register);
         await user.save();
         return res.status(200).json({ status: true, message: "Đăng ký thành công" });
@@ -44,7 +45,9 @@ router.post("/login", [validation.validationLogin], async function (req, res, ne
     try {
         const { email, password } = req.body;
 
-        const userMail = await userModel.findOne({ email: email });
+        const normalizedEmail = email.charAt(0).toLowerCase() + email.slice(1);
+
+        const userMail = await userModel.findOne({ email: normalizedEmail });
 
         if (!userMail) {
             return res.status(400).json({ status: false, message: "Email chưa được đăng ký" });
@@ -81,6 +84,8 @@ router.post("/sent-code", async function (req, res, next) {
     try {
         const { email } = req.body;
 
+        const normalizedEmail = email.charAt(0).toLowerCase() + email.slice(1);
+
         const verifyCode = Math.floor(1000 + Math.random() * 9000);
 
         try {
@@ -105,7 +110,7 @@ router.post("/sent-code", async function (req, res, next) {
 
             const mailOptions = {
                 from: "EV Application <phoenixrestaurant13@gmail.com>", // Người gửi
-                to: email, // Người nhận
+                to: normalizedEmail, // Người nhận
                 subject: subject, // Tiêu đề
                 html: content, // Nội dung HTML
             };
@@ -126,8 +131,10 @@ router.post("/sent-code", async function (req, res, next) {
 router.post("/verify", async function (req, res, next) {
     try {
         const { codeInput, codeResult, email } = req.body;
+        
+        const normalizedEmail = email.charAt(0).toLowerCase() + email.slice(1);
 
-        const user = await userModel.findOne({ email: email });
+        const user = await userModel.findOne({ email: normalizedEmail });
 
         if (codeInput === codeResult) {
             user.isVerified = true;
@@ -147,7 +154,9 @@ router.post("/forgotpass", [validation.validationForgot], async function (req, r
     try {
         const { email, password, password2 } = req.body;
 
-        const userMail = await userModel.findOne({ email: email });
+        const normalizedEmail = email.charAt(0).toLowerCase() + email.slice(1);
+
+        const userMail = await userModel.findOne({ email: normalizedEmail });
 
         if (password === password2) {
             const salt = bcrypt.genSaltSync(10);
