@@ -19,7 +19,7 @@ function normalizeString(str) {
 //localhost:3000/station/addNew
 router.post("/addNew", async function (req, res, next) {
     try {
-        const { user_id, brand_id, specification, service, image, name, location, lat, lng, time, note } = req.body;
+        const { user_id, brand_id, specification, service, image, name, location, address, access, lat, lng, time, note } = req.body;
 
         const currentDate = new Date();
         let day = String(currentDate.getDate()).padStart(2, '0');
@@ -28,7 +28,7 @@ router.post("/addNew", async function (req, res, next) {
 
         let timeNow = currentDate.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
         let dayNow = `${day}/${month}/${year}`;
-        const addNew = { user_id, brand_id, specification, service, image, name, location, lat, lng, time, note, createAt: `${dayNow} : ${timeNow}` };
+        const addNew = { user_id, brand_id, specification, service, image, name, location, address, access, lat, lng, time, note, createAt: `${dayNow} : ${timeNow}` };
 
         await stationModel.create(addNew);
         return res.status(200).json({ status: true, message: "Thêm mới thành công", addNew });
@@ -44,6 +44,7 @@ router.get("/get", async function (req, res, next) {
         const data = await stationModel.find({ isActive: 2 }).populate([
             { path: 'user_id', select: 'name image address' },
             { path: 'brand_id', select: 'name image' },
+            { path: 'address', select: 'name image' },
             {
                 path: 'specification.specification_id',
                 model: 'specification',
@@ -82,7 +83,8 @@ router.post("/getByIdUser", async function (req, res, next) {
 
         const data = await stationModel.find({ user_id: user_id, isActive: isActive }).populate([
             { path: 'user_id', select: 'name image address' },
-            { path: 'brand_id', select: 'name' },
+            { path: 'brand_id', select: 'name image' },
+            { path: 'address', select: 'name image' },
             {
                 path: 'specification.specification_id',
                 model: 'specification',
@@ -118,7 +120,8 @@ router.post("/getByNearStaion", async function (req, res, next) {
 
         const dataRespon = await stationModel.find({ isActive: 2 }).populate([
             { path: 'user_id', select: 'name image address' },
-            { path: 'brand_id', select: 'name' },
+            { path: 'brand_id', select: 'name image' },
+            { path: 'address', select: 'name image' },
             {
                 path: 'specification.specification_id',
                 model: 'specification',
@@ -174,7 +177,8 @@ router.post("/getByAddress", async function (req, res, next) {
 
         const dataRespon = await stationModel.find({ isActive: 2 }).populate([
             { path: 'user_id', select: 'name image address' },
-            { path: 'brand_id', select: 'name' },
+            { path: 'brand_id', select: 'name image' },
+            { path: 'address', select: 'name image' },
             {
                 path: 'specification.specification_id',
                 model: 'specification',
@@ -219,7 +223,8 @@ router.post("/getByOption", async function (req, res, next) {
 
         const dataRespon = await stationModel.find({ isActive: 2 }).populate([
             { path: 'user_id', select: 'name image address' },
-            { path: 'brand_id', select: 'name' },
+            { path: 'brand_id', select: 'name image' },
+            { path: 'address', select: 'name image' },
             {
                 path: 'specification.specification_id',
                 model: 'specification',
@@ -395,7 +400,8 @@ router.post("/getById", async function (req, res, next) {
 
         const data = await stationModel.findById(id).populate([
             { path: 'user_id', select: 'name image address' },
-            { path: 'brand_id', select: 'name' },
+            { path: 'brand_id', select: 'name image' },
+            { path: 'address', select: 'name image' },
             {
                 path: 'specification.specification_id',
                 model: 'specification',
@@ -427,15 +433,19 @@ router.post("/getById", async function (req, res, next) {
 router.post("/update", async function (req, res, next) {
     try {
         const { id } = req.body;
-        const { brand_id, name, location, lat, lng, time, note } = req.body;
+        const { brand_id, specification, service, image, name, location, address, access, lat, lng, time, note } = req.body;
 
         const itemEdit = await stationModel.findById(id);
 
         if (itemEdit) {
             itemEdit.brand_id = brand_id ? brand_id : itemEdit.brand_id;
+            itemEdit.specification = specification ? specification : itemEdit.specification;
+            itemEdit.service = service ? service : itemEdit.service;
             itemEdit.image = image ? image : itemEdit.image;
             itemEdit.name = name ? name : itemEdit.name;
             itemEdit.location = location ? location : itemEdit.location;
+            itemEdit.address = address ? address : itemEdit.address;
+            itemEdit.access = access ? access : itemEdit.access;
             itemEdit.lat = lat ? lat : itemEdit.lat;
             itemEdit.lng = lng ? lng : itemEdit.lng;
             itemEdit.time = time ? time : itemEdit.time;
