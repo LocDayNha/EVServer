@@ -16,11 +16,16 @@ const station = new Schema({
             service_id: { type: ObjectId, ref: 'service' }
         }
     ],
+    brandcar: [
+        {
+            brandcar_id: { type: ObjectId, ref: 'brandCar' }
+        }
+    ],
     image: { type: String, default: '' },
     name: { type: String, default: '' },
     location: { type: String, default: '' },
     address: { type: ObjectId, ref: 'location' },
-    access: { type: String, default: '' },
+    access: { type: String, default: 'Công cộng' },
     lat: { type: Number, default: '' },
     lng: { type: Number, default: '' },
     time: { type: String, default: '' },
