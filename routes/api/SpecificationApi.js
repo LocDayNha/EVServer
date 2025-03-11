@@ -102,7 +102,11 @@ router.post("/update", async function (req, res, next) {
             itemEdit.price = price ? price : itemEdit.price;
             itemEdit.type = type ? type : itemEdit.type;
             await itemEdit.save();
-            return res.status(200).json({ status: true, message: "Cập nhật thành công" });
+            const data = await specificationModel
+                .findById(itemEdit._id)
+                .populate("vehicle_id")
+                .populate("port_id");
+            return res.status(200).json({ status: true, message: "Cập nhật thành công", data });
         } else {
             return res.status(400).json({ status: false, message: "Cập nhật thất bại" });
         }
