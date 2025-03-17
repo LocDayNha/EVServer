@@ -14,7 +14,7 @@ router.post("/addNew", async function (req, res, next) {
 
         let timeNow = currentDate.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
         let dayNow = `${day}/${month}/${year}`;
-        const addNew = { name,image, createAt: `${dayNow} : ${timeNow}` };
+        const addNew = { name, image, createAt: `${dayNow} : ${timeNow}` };
 
         await brandCarModel.create(addNew);
         return res.status(200).json({ status: true, message: "Thêm mới thành công", addNew });
@@ -29,9 +29,10 @@ router.get("/get", async function (req, res, next) {
     try {
         const data = await brandCarModel.find({ isActive: true });
 
-        if (data) {
+        if (data.length > 0) {
+            data.sort((a, b) => (a.name === "Tất cả" ? -1 : b.name === "Tất cả" ? 1 : 0));
             return res.status(200).json({ status: true, message: "Dữ liệu:", data });
-        } else if (data.length = 0) {
+        } else if (!data || data.length === 0) {
             return res.status(200).json({ status: true, message: "Chưa có dữ liệu" });
         } else {
             return res.status(400).json({ status: false, message: "Lấy dữ liệu thất bại" });
