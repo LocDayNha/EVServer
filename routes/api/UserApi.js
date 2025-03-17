@@ -131,7 +131,7 @@ router.post("/sent-code", async function (req, res, next) {
 router.post("/verify", async function (req, res, next) {
     try {
         const { codeInput, codeResult, email } = req.body;
-        
+
         const normalizedEmail = email.charAt(0).toLowerCase() + email.slice(1);
 
         const user = await userModel.findOne({ email: normalizedEmail });
@@ -186,6 +186,24 @@ router.get("/getInforUser", async function (req, res, next) {
     }
 });
 
+//localhost:3000/user/getInforUserByEmail
+router.post("/getInforUserByEmail", async function (req, res, next) {
+    try {
+        const { email } = req.body;
+        const normalizedEmail = email.charAt(0).toLowerCase() + email.slice(1);
+
+        const user = await userModel.findOne({ email: normalizedEmail });
+        if (user) {
+            return res.status(200).json({ status: true, message: "Thông tin người dùng", user });
+        } else {
+            return res.status(200).json({ status: false, message: "Không có thông tin người dùng" });
+        }
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ status: false, message: "Lỗi hệ thống !" });
+    }
+});
+
 //localhost:3000/user/updateInforUser
 router.post("/updateInforUser", [validation.validationUpdateProfile], async function (req, res, next) {
     try {
@@ -210,26 +228,5 @@ router.post("/updateInforUser", [validation.validationUpdateProfile], async func
         return res.status(500).json({ status: false, message: "Lỗi hệ thống !" });
     }
 });
-
-//localhost:3000/user/test
-router.post("/test", async function (req, res, next) {
-    try {
-        const currentDate = new Date();
-        let day = String(currentDate.getDate()).padStart(2, '0');
-        let month = String(currentDate.getMonth() + 1).padStart(2, '0');
-        let year = currentDate.getFullYear();
-
-        let timeNow = currentDate.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
-        let dayNow = `${day}/${month}/${year}`;
-
-        // let createAt = `${dayNow} : ${timeNow}`;
-
-        return res.status(200).json({ status: true, message: "Đăng ký thành công", timeNow, dayNow, createAt: `${dayNow} : ${timeNow}` });
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({ status: false, message: "Loi he thong" });
-    }
-});
-
 
 module.exports = router;

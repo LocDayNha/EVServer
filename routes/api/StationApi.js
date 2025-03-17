@@ -365,7 +365,29 @@ router.post("/getByTravel", async (req, res) => {
 
         const [directionsResponse, stations] = await Promise.all([
             axios.get(osrmUrl),
-            stationModel.find({ isActive: 2 })
+            stationModel.find({ isActive: 2 }).populate([
+                { path: 'user_id', select: 'name image address' },
+                { path: 'brand_id', select: 'name image' },
+                { path: 'address', select: 'name image' },
+                {
+                    path: 'specification.specification_id',
+                    model: 'specification',
+                    populate: [
+                        { path: 'vehicle_id', model: 'vehicle', select: 'name' },
+                        { path: 'port_id', model: 'port', select: 'name type image' }
+                    ]
+                },
+                {
+                    path: 'service.service_id',
+                    model: 'service',
+                    select: 'name'
+                },
+                {
+                    path: 'brandcar.brandcar_id',
+                    model: 'brandcar',
+                    select: 'name image'
+                }
+            ])
         ]);
 
         if (!directionsResponse.data.routes.length) {
