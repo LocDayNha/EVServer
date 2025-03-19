@@ -49,7 +49,7 @@ router.get("/get", async function (req, res, next) {
                 path: 'specification.specification_id',
                 model: 'specification',
                 populate: [
-                    { path: 'vehicle_id', model: 'vehicle', select: 'name' },
+                    { path: 'vehicle.vehicle_id', model: 'vehicle', select: 'name' },
                     { path: 'port_id', model: 'port', select: 'name type image' }
                 ]
             },
@@ -94,7 +94,7 @@ router.post("/getByIdUser", async function (req, res, next) {
                 path: 'specification.specification_id',
                 model: 'specification',
                 populate: [
-                    { path: 'vehicle_id', model: 'vehicle', select: 'name' },
+                    { path: 'vehicle.vehicle_id', model: 'vehicle', select: 'name' },
                     { path: 'port_id', model: 'port', select: 'name type image' }
                 ]
             },
@@ -136,7 +136,7 @@ router.post("/getByNearStaion", async function (req, res, next) {
                 path: 'specification.specification_id',
                 model: 'specification',
                 populate: [
-                    { path: 'vehicle_id', model: 'vehicle', select: 'name' },
+                    { path: 'vehicle.vehicle_id', model: 'vehicle', select: 'name' },
                     { path: 'port_id', model: 'port', select: 'name type image' }
                 ]
             },
@@ -198,7 +198,7 @@ router.post("/getByAddress", async function (req, res, next) {
                 path: 'specification.specification_id',
                 model: 'specification',
                 populate: [
-                    { path: 'vehicle_id', model: 'vehicle', select: 'name' },
+                    { path: 'vehicle.vehicle_id', model: 'vehicle', select: 'name' },
                     { path: 'port_id', model: 'port', select: 'name type image' }
                 ]
             },
@@ -249,7 +249,7 @@ router.post("/getByOption", async function (req, res, next) {
                 path: 'specification.specification_id',
                 model: 'specification',
                 populate: [
-                    { path: 'vehicle_id', model: 'vehicle', select: 'name' },
+                    { path: 'vehicle.vehicle_id', model: 'vehicle', select: 'name' },
                     { path: 'port_id', model: 'port', select: 'name type image' }
                 ]
             },
@@ -373,7 +373,7 @@ router.post("/getByTravel", async (req, res) => {
                     path: 'specification.specification_id',
                     model: 'specification',
                     populate: [
-                        { path: 'vehicle_id', model: 'vehicle', select: 'name' },
+                        { path: 'vehicle.vehicle_id', model: 'vehicle', select: 'name' },
                         { path: 'port_id', model: 'port', select: 'name type image' }
                     ]
                 },
@@ -453,7 +453,7 @@ router.post("/getById", async function (req, res, next) {
                 path: 'specification.specification_id',
                 model: 'specification',
                 populate: [
-                    { path: 'vehicle_id', model: 'vehicle', select: 'name' },
+                    { path: 'vehicle.vehicle_id', model: 'vehicle', select: 'name' },
                     { path: 'port_id', model: 'port', select: 'name type image' }
                 ]
             },
@@ -506,6 +506,31 @@ router.post("/update", async function (req, res, next) {
 
             await itemEdit.save();
             return res.status(200).json({ status: true, message: "Cập nhật thành công" });
+        } else {
+            return res.status(400).json({ status: false, message: "Cập nhật thất bại" });
+        }
+
+    }
+    catch (error) {
+        console.log("error:", error);
+        return res.status(500).json({ status: false, message: "Lỗi hệ thống !" });
+    }
+});
+
+//localhost:3000/station/update2
+router.post("/update2", async function (req, res, next) {
+    try {
+        const { id } = req.body;
+        const { specification } = req.body;
+
+        const itemEdit = await stationModel.findById(id);
+
+        if (itemEdit) {
+
+            itemEdit.specification = specification ? specification : itemEdit.specification;
+
+            await itemEdit.save();
+            return res.status(200).json({ status: true, message: "Cập nhật thành công", itemEdit });
         } else {
             return res.status(400).json({ status: false, message: "Cập nhật thất bại" });
         }

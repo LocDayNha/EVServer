@@ -5,7 +5,11 @@ const ObjectId = Schema.ObjectId;
 const specification = new Schema({
     id: { type: ObjectId },
     user_id: { type: ObjectId, ref: 'user' },
-    vehicle_id: { type: ObjectId, ref: 'vehicle' },
+    vehicle: [
+        {
+            vehicle_id: { type: ObjectId, ref: 'vehicle' }
+        }
+    ],
     port_id: { type: ObjectId, ref: 'port' },
     kw: { type: Number, default: '' },
     slot: { type: Number, default: '' },
