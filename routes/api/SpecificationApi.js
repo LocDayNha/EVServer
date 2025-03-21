@@ -108,12 +108,12 @@ router.get("/getByIdUser", async function (req, res, next) {
 router.post("/update", async function (req, res, next) {
     try {
         const { id } = req.body;
-        const { vehicle_id, port_id, kw, slot, price, type } = req.body;
+        const { vehicle, port_id, kw, slot, price, type } = req.body;
 
         const itemEdit = await specificationModel.findById(id);
 
         if (itemEdit) {
-            itemEdit.vehicle_id = vehicle_id ? vehicle_id : itemEdit.vehicle_id;
+            itemEdit.vehicle = vehicle ? vehicle : itemEdit.vehicle;
             itemEdit.port_id = port_id ? port_id : itemEdit.port_id;
             itemEdit.kw = kw ? kw : itemEdit.kw;
             itemEdit.slot = slot ? slot : itemEdit.slot;
