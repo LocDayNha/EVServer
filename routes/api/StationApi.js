@@ -77,6 +77,47 @@ router.get("/get", async function (req, res, next) {
     }
 });
 
+//localhost:3000/station/getByActive
+router.get("/getByActive", async function (req, res, next) {
+    try {
+        const { isActive } = req.body;
+
+        const data = await stationModel.find({ isActive: isActive }).populate([
+            { path: 'user_id', select: 'name image address' },
+            { path: 'brand_id', select: 'name image' },
+            { path: 'address', select: 'name image' },
+            {
+                path: 'specification.specification_id',
+                model: 'specification',
+                populate: [
+                    { path: 'vehicle.vehicle_id', model: 'vehicle', select: 'name' },
+                    { path: 'port_id', model: 'port', select: 'name type image' }
+                ]
+            },
+            {
+                path: 'service.service_id',
+                model: 'service',
+                select: 'name image'
+            },
+            {
+                path: 'brandcar.brandcar_id',
+                model: 'brandcar',
+                select: 'name image'
+            }
+        ]);
+
+        if (data) {
+            return res.status(200).json({ status: true, message: "Danh sách:", data });
+        } else {
+            return res.status(404).json({ status: false, message: "Không tìm thấy dữ liệu!" });
+        }
+
+    } catch (error) {
+        console.error("error:", error);
+        return res.status(500).json({ status: false, message: "Lỗi hệ thống!" });
+    }
+});
+
 //localhost:3000/station/getByIdUser
 router.post("/getByIdUser", async function (req, res, next) {
     try {
