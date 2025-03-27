@@ -43,6 +43,25 @@ router.get("/get", async function (req, res, next) {
     }
 });
 
+//localhost:3000/location/getAll
+router.get("/getAll", async function (req, res, next) {
+    try {
+        const data = await locationModel.find();
+
+        if (data) {
+            return res.status(200).json({ status: true, message: "Dữ liệu:", data });
+        } else if (data.length = 0) {
+            return res.status(200).json({ status: true, message: "Chưa có dữ liệu" });
+        } else {
+            return res.status(400).json({ status: false, message: "Lấy dữ liệu thất bại" });
+        }
+
+    } catch (error) {
+        console.log("error:", error);
+        return res.status(500).json({ status: false, message: "Lỗi hệ thống !" });
+    }
+});
+
 //localhost:3000/location/getbyId
 router.post("/getbyId", async function (req, res, next) {
     try {
