@@ -78,7 +78,7 @@ router.get("/get", async function (req, res, next) {
 });
 
 //localhost:3000/station/getByActive
-router.get("/getByActive", async function (req, res, next) {
+router.post("/getByActive", async function (req, res, next) {
     try {
         const { isActive } = req.body;
 
