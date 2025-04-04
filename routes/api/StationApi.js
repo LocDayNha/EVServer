@@ -446,7 +446,7 @@ router.post("/getByTravel", async (req, res) => {
 
         // Chia trạm sạc theo từng chặng
         const filteredStations = [];
-        for (let i = 1; i <= 10; i++) {
+        for (let i = 1; i <= stations.length; i++) {
             const minDistance = outputEV * i - 5;
             const maxDistance = outputEV * i + 5;
 
