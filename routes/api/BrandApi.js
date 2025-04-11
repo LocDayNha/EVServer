@@ -96,7 +96,7 @@ router.get("/getbyId", async function (req, res, next) {
 //localhost:3000/brand/update
 router.post("/update", [validation.validationAddnew], async function (req, res, next) {
     try {
-        const { id, name } = req.body;
+        const { id, name,image } = req.body;
 
         const itemEdit = await brandModel.findById(id);
         if (itemEdit) {
@@ -107,6 +107,8 @@ router.post("/update", [validation.validationAddnew], async function (req, res, 
             const dataBrand = await brandModel.findOne({ name: new RegExp(`^${name.trim()}$`, 'i') });
 
             if (!dataBrand || validation.removeVietnameseTones(dataBrand.name) !== normalizedName) {
+                itemEdit.name = name ? name : itemEdit.name;
+                itemEdit.image = image ? image : itemEdit.image;
                 await itemEdit.save();
                 return res.status(200).json({ status: true, message: "Cập nhật thành công" });
             } else {

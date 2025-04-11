@@ -95,7 +95,7 @@ router.get("/getbyId", async function (req, res, next) {
 //localhost:3000/services/update
 router.post("/update", [validation.validationAddnew], async function (req, res, next) {
     try {
-        const { id, name } = req.body;
+        const { id, name, image } = req.body;
 
         const itemEdit = await servicesModel.findById(id);
 
